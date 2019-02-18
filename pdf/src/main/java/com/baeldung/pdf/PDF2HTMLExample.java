@@ -19,22 +19,22 @@ import com.itextpdf.tool.xml.XMLWorkerHelper;
 
 public class PDF2HTMLExample {
 
-	private static final String PDF = "src/main/resources/pdf.pdf";
-	private static final String HTML = "src/main/resources/html.html";
+	private static final String PDF = "pdf.pdf";
+	private static final String HTML = "html.html";
 
 	public static void main(String[] args) {
 		try {
-			generateHTMLFromPDF(PDF);
+			//generateHTMLFromPDF(PDF);
 			generatePDFFromHTML(HTML);
 		} catch (IOException | ParserConfigurationException | DocumentException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static void generateHTMLFromPDF(String filename) throws ParserConfigurationException, IOException {
-		PDDocument pdf = PDDocument.load(new File(filename));
+	private static void generateHTMLFromPDF(String pdfFileName) throws ParserConfigurationException, IOException {
+		PDDocument pdf = PDDocument.load(getFile(pdfFileName));
 		PDFDomTree parser = new PDFDomTree();
-		Writer output = new PrintWriter("src/output/pdf.html", "utf-8");
+		Writer output = new PrintWriter("pdf.html", "utf-8");
 		parser.writeText(pdf, output);
 		output.close();
 		if (pdf != null) {
@@ -42,11 +42,22 @@ public class PDF2HTMLExample {
 		}
 	}
 
-	private static void generatePDFFromHTML(String filename) throws ParserConfigurationException, IOException, DocumentException {
+	private static void generatePDFFromHTML(String htmlFileName) throws ParserConfigurationException, IOException, DocumentException {
 		Document document = new Document();
-		PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("src/output/html.pdf"));
+		PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(newFile("html.pdf")));
 		document.open();
-		XMLWorkerHelper.getInstance().parseXHtml(writer, document, new FileInputStream(filename));
+		XMLWorkerHelper.getInstance().parseXHtml(writer, document, new FileInputStream(getFile(htmlFileName)));
 		document.close();
+	}
+
+	private static File getFile(String fileName) {
+		ClassLoader classLoader = PDF2HTMLExample.class.getClassLoader();
+		return new File(classLoader.getResource(fileName).getFile());
+	}
+
+	private static File newFile(String fileName) {
+		ClassLoader classLoader = PDF2HTMLExample.class.getClassLoader();
+		String dir = classLoader.getResource("").getFile();
+		return new File(dir, fileName);
 	}
 }
